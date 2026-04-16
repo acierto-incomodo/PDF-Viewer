@@ -32,14 +32,6 @@
     "extraMetadata": {
       "main": "main.js"
     },
-    "fileAssociations": [
-      {
-        "ext": "pdf",
-        "name": "PDF File",
-        "description": "Archivo PDF",
-        "role": "Viewer"
-      }
-    ],
     "publish": [
       {
         "provider": "github",
