@@ -22,7 +22,7 @@
   },
   "build": {
     "appId": "com.stormgamesstudios.pdfviewer",
-    "productName": "Storm PDF Viewer",
+    "productName": "PDF Viewer",
     "directories": {
       "output": "dist"
     },
