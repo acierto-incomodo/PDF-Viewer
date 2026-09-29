@@ -56,7 +56,7 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": false,
       "include": "installer.nsh",
-      "artifactName": "${productName}-Setup-${version}.${ext}"
+      "artifactName": "PDF-Viewer-Setup-${version}.${ext}"
     },
     "linux": {
       "target": [
