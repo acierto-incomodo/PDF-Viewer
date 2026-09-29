@@ -52,11 +52,11 @@
       "icon": "app.ico"
     },
     "nsis": {
-      "oneClick": false,
+      "oneClick": true,
       "perMachine": false,
       "allowToChangeInstallationDirectory": false,
       "include": "installer.nsh",
-      "artifactName": "PDF-Viewer-Setup-${version}.${ext}"
+      "artifactName": "PDF-Viewer-Setup.${ext}"
     },
     "linux": {
       "target": [
