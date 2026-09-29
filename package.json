@@ -42,7 +42,10 @@
     "win": {
       "target": [
         {
-          "target": "nsis",
+          "target": [
+            "nsis",
+            "zip"
+          ],
           "arch": [
             "x64"
           ]
@@ -61,7 +64,7 @@
       "target": [
         "AppImage",
         "deb",
-        "pacman"
+        "zip"
       ],
       "category": "Office"
     },

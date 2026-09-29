@@ -1,3 +1,7 @@
+!macro customInit
+  StrCpy $INSTDIR "$APPDATA\StormGamesStudios\Programs\PDF Viewer"
+!macroend
+
 !macro preInit
   SetShellVarContext current
 !macroend
