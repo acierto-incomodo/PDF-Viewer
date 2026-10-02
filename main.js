@@ -181,13 +181,16 @@ ipcMain.handle("open-file-dialog", async () => {
 });
 
 ipcMain.on("open-pdf", (event, filePath) => {
-  openPdfFile(filePath);
+  openPdfFile(filePath, false);
 });
 
-function openPdfFile(filePath) {
+function openPdfFile(
+  filePath,
+  openInNewWindow = store.get("openPdfsInNewWindows", false),
+) {
   addToHistory(filePath);
 
-  if (store.get("openPdfsInNewWindows", false)) {
+  if (openInNewWindow) {
     const pdfWindow = new BrowserWindow({
       width: 1200,
       height: 800,
@@ -219,7 +222,7 @@ function openFileDialog() {
     })
     .then((result) => {
       if (!result.canceled && result.filePaths.length > 0) {
-        openPdfFile(result.filePaths[0]);
+        openPdfFile(result.filePaths[0], false);
       }
     })
     .catch((err) => {
@@ -232,7 +235,6 @@ app.on("second-instance", (event, commandLine) => {
   const file = commandLine.find((arg) => arg.endsWith(".pdf"));
   if (file && mainWindow) {
     openPdfFile(file);
-    mainWindow.focus();
   }
 });
 
