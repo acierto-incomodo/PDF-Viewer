@@ -22,12 +22,56 @@
       p {
         color: #94a3b8;
       }
+      fieldset {
+        margin: 2rem 0 0;
+        padding: 1.25rem;
+        border: 1px solid #334155;
+        border-radius: 8px;
+      }
+      legend {
+        padding: 0 0.5rem;
+        font-weight: 600;
+      }
+      label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        cursor: pointer;
+      }
+      input[type="radio"] {
+        accent-color: #3b82f6;
+      }
     </style>
   </head>
   <body>
     <main>
       <h1>Ajustes</h1>
-      <p>PDF Viewer</p>
+      <fieldset>
+        <legend>Al abrir un PDF</legend>
+        <label>
+          <input type="radio" name="pdf-open-mode" value="same" />
+          Abrir en la ventana actual
+        </label>
+        <label>
+          <input type="radio" name="pdf-open-mode" value="new" />
+          Abrir cada PDF en una ventana nueva
+        </label>
+      </fieldset>
     </main>
+    <script>
+      const modeOptions = document.querySelectorAll('input[name="pdf-open-mode"]');
+
+      window.electronAPI.getPdfOpenMode().then((openInNewWindows) => {
+        const value = openInNewWindows ? "new" : "same";
+        document.querySelector(`input[value="${value}"]`).checked = true;
+      });
+
+      modeOptions.forEach((option) => {
+        option.addEventListener("change", () => {
+          window.electronAPI.setPdfOpenMode(option.value === "new");
+        });
+      });
+    </script>
   </body>
 </html>

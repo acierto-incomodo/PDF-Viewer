@@ -1,5 +1,6 @@
 const { app, BrowserWindow, Menu, dialog, ipcMain } = require("electron");
 const path = require("path");
+const { pathToFileURL } = require("url");
 const Store = require("electron-store");
 
 const store = new Store();
@@ -91,9 +92,7 @@ function createWindow() {
   // Abrir PDF si viene desde fuera
   if (fileToOpen) {
     mainWindow.webContents.once("did-finish-load", () => {
-      addToHistory(fileToOpen);
-      mainWindow.loadURL(`file://${fileToOpen}`);
-      mainWindow.setTitle(`Visualizando: ${path.basename(fileToOpen)}`);
+      openPdfFile(fileToOpen);
     });
   }
 }
@@ -163,6 +162,16 @@ ipcMain.handle("clear-history", () => {
   return [];
 });
 
+ipcMain.handle("get-pdf-open-mode", () =>
+  store.get("openPdfsInNewWindows", false),
+);
+
+ipcMain.handle("set-pdf-open-mode", (event, openInNewWindows) => {
+  const value = openInNewWindows === true;
+  store.set("openPdfsInNewWindows", value);
+  return value;
+});
+
 ipcMain.handle("open-file-dialog", async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ["openFile"],
@@ -172,12 +181,35 @@ ipcMain.handle("open-file-dialog", async () => {
 });
 
 ipcMain.on("open-pdf", (event, filePath) => {
+  openPdfFile(filePath);
+});
+
+function openPdfFile(filePath) {
   addToHistory(filePath);
-  mainWindow.loadURL(`file://${filePath}`);
+
+  if (store.get("openPdfsInNewWindows", false)) {
+    const pdfWindow = new BrowserWindow({
+      width: 1200,
+      height: 800,
+      minWidth: 900,
+      minHeight: 600,
+      title: `Visualizando: ${path.basename(filePath)}`,
+      icon: path.join(__dirname, "icon.png"),
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: true,
+      },
+    });
+    pdfWindow.loadURL(pathToFileURL(filePath).toString());
+    return;
+  }
+
+  mainWindow.loadURL(pathToFileURL(filePath).toString());
   mainWindow.setTitle(`Visualizando: ${path.basename(filePath)}`);
   mainWindow.maximize();
   mainWindow.focus();
-});
+}
 
 function openFileDialog() {
   dialog
@@ -187,10 +219,7 @@ function openFileDialog() {
     })
     .then((result) => {
       if (!result.canceled && result.filePaths.length > 0) {
-        const filePath = result.filePaths[0];
-        addToHistory(filePath);
-        mainWindow.loadURL(`file://${filePath}`);
-        mainWindow.setTitle(`Visualizando: ${path.basename(filePath)}`);
+        openPdfFile(result.filePaths[0]);
       }
     })
     .catch((err) => {
@@ -202,9 +231,7 @@ function openFileDialog() {
 app.on("second-instance", (event, commandLine) => {
   const file = commandLine.find((arg) => arg.endsWith(".pdf"));
   if (file && mainWindow) {
-    addToHistory(file);
-    mainWindow.loadURL(`file://${file}`);
-    mainWindow.setTitle(`Visualizando: ${path.basename(file)}`);
+    openPdfFile(file);
     mainWindow.focus();
   }
 });
