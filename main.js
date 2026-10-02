@@ -5,6 +5,7 @@ const Store = require("electron-store");
 const store = new Store();
 
 let mainWindow;
+let settingsWindow;
 let fileToOpen = null;
 
 // Evitar múltiples instancias
@@ -57,6 +58,10 @@ function createWindow() {
         openFileDialog();
       },
     },
+    {
+      label: "Ajustes",
+      click: openSettingsWindow,
+    },
     { type: "separator" },
     {
       label: "Ver",
@@ -93,6 +98,34 @@ function createWindow() {
   }
 }
 
+function openSettingsWindow() {
+  if (settingsWindow && !settingsWindow.isDestroyed()) {
+    settingsWindow.focus();
+    return;
+  }
+
+  settingsWindow = new BrowserWindow({
+    width: 600,
+    height: 450,
+    resizable: false,
+    title: "Ajustes - PDF Viewer",
+    parent: mainWindow,
+    icon: path.join(__dirname, "icon.png"),
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      preload: path.join(__dirname, "preload.js"),
+    },
+  });
+
+  settingsWindow.setMenu(null);
+  settingsWindow.loadFile("settings.html");
+  settingsWindow.on("closed", () => {
+    settingsWindow = null;
+  });
+}
+
 function normalizePath(p) {
   return path.resolve(p).toLowerCase();
 }
@@ -114,6 +147,21 @@ function addToHistory(filePath) {
 }
 
 ipcMain.handle("get-history", () => store.get("history", []));
+
+ipcMain.handle("remove-history-item", (event, filePath) => {
+  const history = store.get("history", []);
+  const normalized = normalizePath(filePath);
+  const updatedHistory = history.filter(
+    (item) => normalizePath(item.path) !== normalized,
+  );
+  store.set("history", updatedHistory);
+  return updatedHistory;
+});
+
+ipcMain.handle("clear-history", () => {
+  store.set("history", []);
+  return [];
+});
 
 ipcMain.handle("open-file-dialog", async () => {
   const result = await dialog.showOpenDialog(mainWindow, {

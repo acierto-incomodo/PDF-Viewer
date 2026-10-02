@@ -57,6 +57,9 @@
         max-width: 1000px;
       }
       .history-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         border-bottom: 1px solid #334155;
         padding-bottom: 1rem;
         margin-bottom: 2rem;
@@ -71,6 +74,7 @@
         gap: 1.5rem;
       }
       .card {
+        position: relative;
         background-color: var(--card);
         padding: 1.5rem;
         border-radius: 16px;
@@ -82,6 +86,43 @@
         background-color: #334155;
         transform: scale(1.02);
         border-color: var(--accent);
+      }
+      .remove-card {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 2rem;
+        height: 2rem;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        background: #0f172a;
+        color: var(--text);
+        font-size: 1.25rem;
+        line-height: 1;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.15s, background-color 0.15s;
+      }
+      .card:hover .remove-card,
+      .remove-card:focus-visible {
+        opacity: 1;
+      }
+      .remove-card:hover {
+        background: #dc2626;
+      }
+      .clear-history {
+        border: 1px solid #475569;
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+        background: transparent;
+        color: #cbd5e1;
+        cursor: pointer;
+      }
+      .clear-history:hover {
+        color: white;
+        border-color: #ef4444;
       }
       .card-name {
         font-weight: 600;
@@ -116,31 +157,58 @@
     </div>
 
     <div class="history">
-      <div class="history-header">Documentos Recientes</div>
+      <div class="history-header">
+        <span>Documentos Recientes</span>
+        <button id="clearHistoryBtn" class="clear-history" type="button">Eliminar todos</button>
+      </div>
       <div id="grid" class="grid"></div>
     </div>
 
     <script>
       const grid = document.getElementById("grid");
       const openBtn = document.getElementById("openBtn");
+      const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
       async function renderHistory() {
         const history = await window.electronAPI.getHistory();
+        clearHistoryBtn.hidden = history.length === 0;
+        grid.replaceChildren();
         if (history.length === 0) {
-          grid.innerHTML =
-            '<div class="empty">Tu historial aparecerá aquí cuando abras un archivo.</div>';
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "Tu historial aparecerá aquí cuando abras un archivo.";
+          grid.append(empty);
           return;
         }
-        grid.innerHTML = history
-          .map(
-            (item) => `
-                <div class="card" onclick="openFile('${item.path.replace(/\\/g, "/")}')">
-                    <span class="card-name">${item.name}</span>
-                    <span class="card-path">${item.path}</span>
-                </div>
-            `,
-          )
-          .join("");
+
+        for (const item of history) {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.addEventListener("click", () => openFile(item.path));
+
+          const name = document.createElement("span");
+          name.className = "card-name";
+          name.textContent = item.name;
+
+          const filePath = document.createElement("span");
+          filePath.className = "card-path";
+          filePath.textContent = item.path;
+
+          const removeButton = document.createElement("button");
+          removeButton.className = "remove-card";
+          removeButton.type = "button";
+          removeButton.setAttribute("aria-label", `Eliminar ${item.name} del historial`);
+          removeButton.title = "Eliminar del historial";
+          removeButton.textContent = "×";
+          removeButton.addEventListener("click", async (event) => {
+            event.stopPropagation();
+            await window.electronAPI.removeHistoryItem(item.path);
+            renderHistory();
+          });
+
+          card.append(removeButton, name, filePath);
+          grid.append(card);
+        }
       }
 
       function openFile(path) {
@@ -152,6 +220,11 @@
         if (!result.canceled && result.filePaths.length > 0) {
           openFile(result.filePaths[0]);
         }
+      });
+
+      clearHistoryBtn.addEventListener("click", async () => {
+        await window.electronAPI.clearHistory();
+        renderHistory();
       });
 
       renderHistory();
