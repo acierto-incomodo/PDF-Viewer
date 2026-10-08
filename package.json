@@ -66,13 +66,10 @@
       "category": "Office"
     },
     "appImage": {
-      "artifactName": "${productName}-${version}.AppImage"
+      "artifactName": "PDF-Viewer-${version}.AppImage"
     },
     "deb": {
-      "artifactName": "${productName}-${version}.deb"
-    },
-    "pacman": {
-      "artifactName": "${productName}-${version}.pacman"
+      "artifactName": "PDF-Viewer-${version}.deb"
     },
     "fileAssociations": [
       {
