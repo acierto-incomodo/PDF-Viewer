@@ -2,12 +2,131 @@ const { app, BrowserWindow, Menu, dialog, ipcMain } = require("electron");
 const path = require("path");
 const { pathToFileURL } = require("url");
 const Store = require("electron-store");
+const { autoUpdater } = require("electron-updater");
 
 const store = new Store();
 
 let mainWindow;
 let settingsWindow;
 let fileToOpen = null;
+let updateCheckInProgress = false;
+let manualUpdateCheck = false;
+
+autoUpdater.on("checking-for-update", () => {
+  console.log("Buscando actualizaciones...");
+});
+
+autoUpdater.on("update-available", (info) => {
+  const wasManualCheck = manualUpdateCheck;
+  manualUpdateCheck = false;
+
+  if (wasManualCheck) {
+    dialog.showMessageBox(mainWindow, {
+      type: "info",
+      title: "Actualización disponible",
+      message: `Se encontró la versión ${info.version}.`,
+      detail: "La descarga comenzará automáticamente.",
+    });
+  }
+});
+
+autoUpdater.on("update-not-available", () => {
+  updateCheckInProgress = false;
+  const wasManualCheck = manualUpdateCheck;
+  manualUpdateCheck = false;
+
+  if (wasManualCheck) {
+    dialog.showMessageBox(mainWindow, {
+      type: "info",
+      title: "Sin actualizaciones",
+      message: "Ya tienes instalada la versión más reciente.",
+    });
+  }
+});
+
+autoUpdater.on("update-downloaded", async (info) => {
+  updateCheckInProgress = false;
+  const { response } = await dialog.showMessageBox(mainWindow, {
+    type: "info",
+    title: "Actualización lista",
+    message: `La versión ${info.version} se descargó correctamente.`,
+    detail: "Reinicia la aplicación para instalarla.",
+    buttons: ["Reiniciar ahora", "Más tarde"],
+    defaultId: 0,
+    cancelId: 1,
+  });
+
+  if (response === 0) {
+    autoUpdater.quitAndInstall();
+  }
+});
+
+autoUpdater.on("error", (error) => {
+  updateCheckInProgress = false;
+  console.error("Error del actualizador:", error);
+
+  if (manualUpdateCheck) {
+    manualUpdateCheck = false;
+    dialog.showMessageBox(mainWindow, {
+      type: "error",
+      title: "Error al buscar actualizaciones",
+      message: "No se pudo completar la búsqueda de actualizaciones.",
+      detail: error.message || String(error),
+    });
+  }
+});
+
+function canCheckForUpdates() {
+  return (
+    process.platform === "win32" ||
+    (process.platform === "linux" && Boolean(process.env.APPIMAGE))
+  );
+}
+
+function checkForUpdates(manual = false) {
+  if (!app.isPackaged) {
+    if (manual) {
+      dialog.showMessageBox(mainWindow, {
+        type: "info",
+        title: "Actualizaciones",
+        message: "La búsqueda de actualizaciones solo está disponible en la versión instalada.",
+      });
+    }
+    return;
+  }
+
+  if (!canCheckForUpdates()) {
+    if (manual) {
+      dialog.showMessageBox(mainWindow, {
+        type: "info",
+        title: "Actualizaciones no disponibles",
+        message: "Las actualizaciones automáticas no están disponibles para esta instalación.",
+      });
+    }
+    return;
+  }
+
+  if (updateCheckInProgress) {
+    return;
+  }
+
+  updateCheckInProgress = true;
+  manualUpdateCheck = manual;
+  autoUpdater.checkForUpdates().catch((error) => {
+    updateCheckInProgress = false;
+    console.error("No se pudo iniciar la búsqueda de actualizaciones:", error);
+
+    if (manualUpdateCheck) {
+      manualUpdateCheck = false;
+      dialog.showMessageBox(mainWindow, {
+        type: "error",
+        title: "Error al buscar actualizaciones",
+        message: "No se pudo completar la búsqueda de actualizaciones.",
+        detail: error.message || String(error),
+      });
+    }
+  });
+}
 
 // Evitar múltiples instancias
 const gotTheLock = app.requestSingleInstanceLock();
@@ -62,6 +181,10 @@ function createWindow() {
     {
       label: "Ajustes",
       click: openSettingsWindow,
+    },
+    {
+      label: "Buscar actualizaciones...",
+      click: () => checkForUpdates(true),
     },
     {
       label: "Ver",
@@ -242,6 +365,7 @@ app.whenReady().then(() => {
   app.setAsDefaultProtocolClient("pdf");
 
   createWindow();
+  checkForUpdates();
 });
 
 app.on("window-all-closed", () => {

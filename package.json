@@ -1,6 +1,6 @@
 {
   "name": "pdf-viewer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -82,5 +82,9 @@
         "role": "Viewer"
       }
     ]
+  },
+  "allowScripts": {
+    "electron@41.10.7": true,
+    "electron-winstaller@5.4.0": true
   }
 }
