@@ -183,7 +183,7 @@ function createWindow() {
       click: openSettingsWindow,
     },
     {
-      label: "Buscar actualizaciones...",
+      label: "Buscar actualizaciones",
       click: () => checkForUpdates(true),
     },
     {
