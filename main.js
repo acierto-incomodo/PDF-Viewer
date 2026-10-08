@@ -63,7 +63,6 @@ function createWindow() {
       label: "Ajustes",
       click: openSettingsWindow,
     },
-    { type: "separator" },
     {
       label: "Ver",
       submenu: [
@@ -77,7 +76,6 @@ function createWindow() {
         { role: "togglefullscreen" },
       ],
     },
-    { type: "separator" },
     { label: "Salir", role: "quit" },
   ];
 
