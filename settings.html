@@ -22,6 +22,10 @@
       p {
         color: #94a3b8;
       }
+      .app-version {
+        margin-top: 2rem;
+        font-size: 0.9rem;
+      }
       fieldset {
         margin: 2rem 0 0;
         padding: 1.25rem;
@@ -107,6 +111,9 @@
           Abrir cada PDF en una ventana nueva
         </label>
       </fieldset>
+      <p class="app-version">
+        Versión <span id="appVersion"></span>
+      </p>
       <p id="saveStatus" class="save-status" role="status" aria-live="polite"></p>
     </main>
     <script>
@@ -114,7 +121,12 @@
       const saveStatus = document.getElementById("saveStatus");
       const saveStatusMessage = document.getElementById("saveStatusMessage");
       const saveStatusProgress = document.getElementById("saveStatusProgress");
+      const appVersion = document.getElementById("appVersion");
       let saveStatusTimeout;
+
+      window.electronAPI.getAppVersion().then((version) => {
+        appVersion.textContent = version;
+      });
 
       window.electronAPI.getPdfOpenMode().then((openInNewWindows) => {
         const value = openInNewWindows ? "new" : "same";

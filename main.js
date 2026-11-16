@@ -287,6 +287,8 @@ ipcMain.handle("get-pdf-open-mode", () =>
   store.get("openPdfsInNewWindows", false),
 );
 
+ipcMain.handle("get-app-version", () => app.getVersion());
+
 ipcMain.handle("set-pdf-open-mode", (event, openInNewWindows) => {
   const value = openInNewWindows === true;
   store.set("openPdfsInNewWindows", value);
