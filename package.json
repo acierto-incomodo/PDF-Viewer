@@ -44,13 +44,27 @@
     "win": {
       "target": [
         {
-          "target": "nsis",
+          "target": ["nsis", "appx"],
           "arch": [
             "x64"
           ]
         }
       ],
       "icon": "app.ico"
+    },
+    "appx": {
+      "identityName": "StormGamesStudios.PDFViewer",
+      "publisher": "",
+      "publisherDisplayName": "StormGamesStudios",
+      "displayName": "PDF Viewer",
+      "capabilities": [
+        "runFullTrust"
+      ],
+      "backgroundColor": "#121212",
+      "languages": [
+        "es-ES"
+      ],
+      "showNameOnTiles": true
     },
     "nsis": {
       "oneClick": true,
