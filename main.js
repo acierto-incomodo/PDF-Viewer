@@ -213,7 +213,7 @@ function createWindow() {
   // Abrir PDF si viene desde fuera
   if (fileToOpen) {
     mainWindow.webContents.once("did-finish-load", () => {
-      openPdfFile(fileToOpen);
+      openExternalPdfFile(fileToOpen);
     });
   }
 }
@@ -335,6 +335,19 @@ function openPdfFile(
   mainWindow.focus();
 }
 
+function openExternalPdfFile(filePath) {
+  const isHomePage =
+    mainWindow &&
+    !mainWindow.isDestroyed() &&
+    mainWindow.webContents.getURL() ===
+      pathToFileURL(path.join(__dirname, "index.html")).toString();
+
+  openPdfFile(
+    filePath,
+    isHomePage ? false : store.get("openPdfsInNewWindows", false),
+  );
+}
+
 function openFileDialog() {
   dialog
     .showOpenDialog(mainWindow, {
@@ -355,7 +368,7 @@ function openFileDialog() {
 app.on("second-instance", (event, commandLine) => {
   const file = commandLine.find((arg) => arg.endsWith(".pdf"));
   if (file && mainWindow) {
-    openPdfFile(file);
+    openExternalPdfFile(file);
   }
 });
 
