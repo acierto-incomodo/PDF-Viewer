@@ -3,6 +3,7 @@
   "version": "1.0.4",
   "description": "",
   "main": "main.js",
+  "desktopName": "com.stormgamesstudios.pdfviewer",
   "scripts": {
     "start": "electron .",
     "build:win": "electron-builder --win",
