@@ -1,7 +1,7 @@
 const { app, BrowserWindow, Menu, dialog, ipcMain } = require("electron");
 const path = require("path");
 const { pathToFileURL } = require("url");
-const Store = require("electron-store");
+const Store = require("electron-store").default;
 const { autoUpdater } = require("electron-updater");
 
 const store = new Store();
