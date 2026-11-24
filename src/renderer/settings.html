@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ajustes - PDF Viewer</title>
+    <link rel="stylesheet" href="./styles/settings.css" />
+  </head>
+  <body>
+    <div id="saveStatus" class="save-toast" role="status" aria-live="polite" aria-atomic="true">
+      <span id="saveStatusMessage" class="save-toast-message"></span>
+      <div class="save-toast-progress" aria-hidden="true">
+        <div id="saveStatusProgress" class="save-toast-progress-bar"></div>
+      </div>
+    </div>
+    <main>
+      <h1>Ajustes</h1>
+      <fieldset>
+        <legend>Al abrir un PDF</legend>
+        <label>
+          <input type="radio" name="pdf-open-mode" value="same" />
+          Abrir en la ventana actual
+        </label>
+        <label>
+          <input type="radio" name="pdf-open-mode" value="new" />
+          Abrir cada PDF en una ventana nueva
+        </label>
+      </fieldset>
+      <p class="app-version">
+        Versión <span id="appVersion"></span>
+      </p>
+    </main>
+    <script src="./js/settings.js"></script>
+  </body>
+</html>

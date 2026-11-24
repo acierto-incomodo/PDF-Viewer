@@ -5,6 +5,12 @@ const Store = require("electron-store");
 const { autoUpdater } = require("electron-updater");
 
 const store = new Store();
+const ASSETS_DIR = path.join(__dirname, "..", "..", "assets");
+const RENDERER_DIR = path.join(__dirname, "..", "renderer");
+const INDEX_PATH = path.join(RENDERER_DIR, "index.html");
+const SETTINGS_PATH = path.join(RENDERER_DIR, "settings.html");
+const PRELOAD_PATH = path.join(__dirname, "preload.js");
+const APP_ICON = path.join(ASSETS_DIR, "icon.png");
 
 let mainWindow;
 let settingsWindow;
@@ -153,12 +159,12 @@ function createWindow() {
     minHeight: 600,
 
     title: "PDF Viewer",
-    icon: path.join(__dirname, "icon.png"),
+    icon: APP_ICON,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
-      preload: path.join(__dirname, "preload.js"),
+      preload: PRELOAD_PATH,
       plugins: true,
     },
   });
@@ -168,7 +174,7 @@ function createWindow() {
       label: "Inicio",
       accelerator: "CmdOrCtrl+H",
       click: () => {
-        mainWindow.loadFile("index.html");
+        mainWindow.loadFile(INDEX_PATH);
       },
     },
     {
@@ -208,7 +214,7 @@ function createWindow() {
   mainWindow.setMenuBarVisibility(true);
   mainWindow.setAutoHideMenuBar(false);
 
-  mainWindow.loadFile("index.html");
+  mainWindow.loadFile(INDEX_PATH);
 
   // Abrir PDF si viene desde fuera
   if (fileToOpen) {
@@ -230,17 +236,17 @@ function openSettingsWindow() {
     resizable: false,
     title: "Ajustes - PDF Viewer",
     parent: mainWindow,
-    icon: path.join(__dirname, "icon.png"),
+    icon: APP_ICON,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
-      preload: path.join(__dirname, "preload.js"),
+      preload: PRELOAD_PATH,
     },
   });
 
   settingsWindow.setMenu(null);
-  settingsWindow.loadFile("settings.html");
+  settingsWindow.loadFile(SETTINGS_PATH);
   settingsWindow.on("closed", () => {
     settingsWindow = null;
   });
@@ -320,7 +326,7 @@ function openPdfFile(
       minWidth: 900,
       minHeight: 600,
       title: `Visualizando: ${path.basename(filePath)}`,
-      icon: path.join(__dirname, "icon.png"),
+      icon: APP_ICON,
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
@@ -342,7 +348,7 @@ function openExternalPdfFile(filePath) {
     mainWindow &&
     !mainWindow.isDestroyed() &&
     mainWindow.webContents.getURL() ===
-      pathToFileURL(path.join(__dirname, "index.html")).toString();
+      pathToFileURL(INDEX_PATH).toString();
 
   openPdfFile(
     filePath,
